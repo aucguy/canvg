@@ -62,7 +62,7 @@
 		}
 
 		// store class on canvas
-		if (target.svg != null) target.svg.stop();
+		//if (target.svg != null) target.svg.stop();
 		var svg = build(opts || {});
 		// on i.e. 8 for flash canvas, we can't assign the property so check for it
 		if (!(target.childNodes.length == 1 && target.childNodes[0].nodeName == 'OBJECT')) target.svg = svg;
@@ -80,6 +80,7 @@
 			// load from url
 			svg.load(ctx, s);
 		}
+    return svg;
 	}
 
 	// see https://developer.mozilla.org/en-US/docs/Web/API/Element.matches
@@ -873,7 +874,7 @@
 					}
 				}
 			};
-			
+
 			// Microsoft Edge fix
 			var allUppercase = new RegExp("^[A-Z\-]+$");
 			var normalizeAttributeName = function (name) {
@@ -1744,13 +1745,13 @@
 			this.getGradient = function() {
 				// OVERRIDE ME!
 			}
-			
+
 			this.gradientUnits = function () {
 				return this.attribute('gradientUnits').valueOrDefault('objectBoundingBox');
 			}
-			
+
 			this.attributesToInherit = ['gradientUnits'];
-			
+
 			this.inheritStopContainer = function (stopsContainer) {
 				for (var i=0; i<this.attributesToInherit.length; i++) {
 					var attributeToInherit = this.attributesToInherit[i];
@@ -1820,7 +1821,7 @@
 		svg.Element.linearGradient = function(node) {
 			this.base = svg.Element.GradientBase;
 			this.base(node);
-			
+
 			this.attributesToInherit.push('x1');
 			this.attributesToInherit.push('y1');
 			this.attributesToInherit.push('x2');
@@ -1862,7 +1863,7 @@
 		svg.Element.radialGradient = function(node) {
 			this.base = svg.Element.GradientBase;
 			this.base(node);
-			
+
 			this.attributesToInherit.push('cx');
 			this.attributesToInherit.push('cy');
 			this.attributesToInherit.push('r');
@@ -2911,6 +2912,7 @@
 			var e = svg.CreateElement(dom.documentElement);
 			e.root = true;
 			e.addStylesFromStyleDefinition();
+      svg.e = e;
 
 			// render loop
 			var isFirstRender = true;
@@ -2976,7 +2978,7 @@
 				waitingForImages = false;
 				draw();
 			}
-			svg.intervalID = setInterval(function() {
+			svg.update = function() {
 				var needUpdate = false;
 
 				if (waitingForImages && svg.ImagesLoaded()) {
@@ -3006,14 +3008,14 @@
 					draw();
 					svg.Mouse.runEvents(); // run and clear our events
 				}
-			}, 1000 / svg.FRAMERATE);
+			};
 		}
 
-		svg.stop = function() {
+		/*svg.stop = function() {
 			if (svg.intervalID) {
 				clearInterval(svg.intervalID);
 			}
-		}
+		}*/
 
 		svg.Mouse = new (function() {
 			this.events = [];
@@ -3055,6 +3057,7 @@
 					var element = this.eventElements[i];
 					while (element) {
 						e.run(element);
+            if(opts['eventCallback']) opts['eventCallback'](e, element);
 						element = element.parent;
 					}
 				}
@@ -3080,7 +3083,7 @@
 				scaleWidth: dw,
 				scaleHeight: dh
 			}
-			
+
 			for(var prop in opts) {
 				if(opts.hasOwnProperty(prop)){
 					cOpts[prop] = opts[prop];
