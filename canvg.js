@@ -2973,6 +2973,8 @@
 				}
 			}
 
+      svg.draw = draw;
+
 			var waitingForImages = true;
 			if (svg.ImagesLoaded()) {
 				waitingForImages = false;
